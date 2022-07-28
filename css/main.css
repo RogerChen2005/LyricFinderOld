@@ -1,0 +1,125 @@
+body{
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    color: #303133;
+}
+.hidden{
+    display: none;
+}
+#avatar{
+margin-top: 10px;
+position: absolute;
+right: 0;
+}
+#search{
+    display: flex; 
+    flex-direction:row;
+}
+#about{
+    text-align: center;
+}
+#main-page{
+    margin-right: 10px;
+    overflow: hidden scroll;
+    height: calc(100vh - 121px);
+}
+.r-card{
+    border-radius: 10px;
+    padding:0;
+    margin-bottom: 10px;
+}
+.r-card img{
+    width: 70px;
+    padding: 0;
+}
+
+#player{
+    width: 60px;
+    height:60px;
+    position: absolute;
+    border-radius: 100%;
+    background-color: #409EFF;
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    bottom: 5vh;
+    right: 3vw;
+    transition: .35s cubic-bezier(0.52, 0.02, 0.48, 1);
+    z-index: 100;
+}
+
+#player:hover{
+    width: 310px;
+    height: 475px;
+    border-radius: 20px;
+    box-shadow: 0 0px 100px rgba(0, 0, 0, .15), 0 0 8px rgba(0, 0, 0, .09);
+    background-color: rgb(255, 255, 255);
+    padding: 0 30px 0 30px;
+}
+
+#player #player_icon{
+    text-shadow: 0 0px 3px rgba(0, 0, 0, .15), 0 0 8px rgba(0, 0, 0, .09);
+    margin-top: 3px;
+    font-size: 55px;
+    color: rgb(255, 255, 255);
+    width: 60px;
+    text-align: center;
+    vertical-align: middle;
+    overflow: hidden;
+}
+
+#player-ui{
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    text-align: center;
+    font-size: 14px;
+}
+
+#player-ui #album-cover{
+    width: 70%;
+    border-radius: 5px;
+    box-shadow: 0 0px 50px rgba(0, 0, 0, .54), 0 0 8px rgba(0, 0, 0, .09);
+    margin-bottom: 30px;
+    margin-top: 40px;
+}
+#player-ui audio{
+    width: 90%;
+    height: 50px;
+    margin-bottom: 10px;
+}
+#player-ui #title{
+    font-size:30px;
+    margin:12px;
+    font-weight: 200;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+#player-ui #album{
+    font-size:14px;
+    margin:8px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+#player-ui #artist{
+    font-size:10px;
+    margin:5px;
+    font-weight: 300;
+    white-space: nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+#about{
+    font-size: 20px;
+    text-align: left;
+    margin: 0 15% 0 15%;
+    padding: 40px;
+    padding-top: 20px;
+    border: solid 1px #bfbfbf;
+    border-radius: 10px;
+}
+#about a{
+    color: #303133;
+}

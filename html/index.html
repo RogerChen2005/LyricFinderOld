@@ -1,12 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <!-- <link rel="stylesheet" href="../css/ele-index.css"> -->
+  <link rel="stylesheet" href="../css/main.css">
+  <!-- import Vue before Element -->
+  <script src="../js/vue.js"></script>
+  <!-- import JavaScript -->
+  <!-- <script src="../js/ele-index.js"></script> -->
+  <script src="../js/search.js"></script>
+  <script src="../js/funcs.js"></script>
+   <!-- 引入样式 -->
+   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+   <!-- 引入组件库 -->
+   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 </head>
+
 <body>
-    Test page
+    <div id="app">
+    <el-container>
+        <el-header>
+            <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+                <el-menu-item index="1" v-on:click = "current = 1">主页</el-menu-item>
+                <el-menu-item index="2" v-on:click = "current = 2">搜索</el-menu-item>
+                <el-menu-item index="3" v-on:click = "current = 3">关于</el-menu-item>
+                <el-avatar onclick="showW()" style="cursor: pointer;" id="avatar" :size="40" :src="avatar_img"></el-avatar>
+                
+
+                <el-dialog title="登陆" :visible.sync="dialogVisible" width="500px">
+                  <el-form ref="login" :model="login" :rules="login_rule" label-width="80px">
+                    <el-form-item label="手机号" prop = "phone_number">
+                      <el-input v-model="login.phone_number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="密码" prop = "password">
+                      <el-input v-model="login.password"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="验证码" prop = "captcha">
+                      <el-input style = "width: 50%;" v-model="login.captcha"></el-input>
+                      <el-button type="primary" @click="onSendcaptcha">发送</el-button>
+                    </el-form-item>
+
+                    <el-form-item>
+                      <el-button type="primary" @click="onLogin">登陆</el-button>
+                      <el-button @click="dialogVisible = false">取消</el-button>
+                    </el-form-item>
+                  </el-form>
+                    <!-- <span slot="footer" class="dialog-footer">
+                        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                    </span> -->
+                </el-dialog>
+
+
+            </el-menu>
+        </el-header>
+        <el-main id = "main-page">
+
+
+
+            <div v-if = "current == 1">
+                <div>
+                  <el-skeleton :rows="10" :loading="loading" animated :throttle="100">
+                    <template slot="template">
+
+                    </template>
+                    <template>
+                      <el-checkbox-group v-model="checkList" @change="handleCheckedChange">
+                      <el-card v-for="i in song_list" class="r-card" body-style="padding:10px;display: flex;
+                      flex-direction: row;align-items: center" shadow="hover">
+                        <!-- <div v-for="o in 2" :key="o" class="text item">
+                          {{'列表内容 ' + o }}
+                        </div> -->
+                        <div style="width: 80px;">
+                          <img title="cover" :src="i.img_url">
+                        </div>
+                        <div style="display: flex;flex-direction: column;
+                        font-size:15px;color: #606266;">
+                          <div>歌曲标题: {{i.title}}</div>
+                          <div>艺术家: {{i.artists}}</div>
+                          <div>专辑: {{i.album}}</div>
+                        </div>
+                        <div style="margin-left: auto;margin-right:10px;">
+                          <el-button v-on:click = "delete_item(i)" type="danger">删除</el-button>
+                          <el-button v-on:click = "listen_temporary(i)" style="margin-right: 20px;">预览</el-button>
+                          <el-checkbox :label="i.id" >选择</el-checkbox>
+                        </div>
+                      </el-card>
+                      </el-checkbox-group>
+                      <!-- 加载完毕 -->
+                    </template>
+                  </el-skeleton>
+                </div>
+            </div>
+
+
+
+
+            <div v-if = "current == 2">
+
+              <div id = "search" style="margin-bottom:20px;">
+                <el-input v-model="search" placeholder="请输入内容"> </el-input>
+                <el-button v-on:click = "search_offset = 0;tosearch(0)" type = "primary" style="margin-left: 20px;" icon="el-icon-search">搜索</el-button>
+              </div>
+
+
+              <div v-if = "searching == true">
+                <el-skeleton :rows="10" :loading="search_loading" animated>
+                  <template slot="template">
+
+                  </template>
+                  <template>
+                    <el-card v-for="i in searchlist" class="r-card" body-style="padding:10px;display: flex;
+                    flex-direction: row;align-items: center" shadow="hover">
+                      <div style="display: flex;flex-direction: row;
+                      font-size:15px;color: #606266;width: 100%; padding-top: 10px;">
+                        <div style="width: 33%;">歌曲标题: {{i.title}}</div>
+                        <div style="width: 33%;">艺术家: {{i.artists}}</div>
+                        <div style="width: 33%;">专辑: {{i.album}}</div>
+                        <el-button v-on:click = "listen_temporary(i)" style="margin-left: 20px;">预览</el-button>
+                        <el-button v-on:click = "add_item(i)" type = "primary" style="margin-left: 20px;">添加</el-button>
+                      </div>
+                    </el-card>
+                    <!-- 加载完毕 -->
+                  </template>
+                </el-skeleton>
+              </div>
+
+              <div style="margin-top: 20px;">
+                <el-button v-on:click = "next_page" type = "primary">下一页</el-button>
+                <el-input v-model="page_number" placeholder="请输入页码" style="width: 200px;margin-left:20px;margin-right: 20px;"></el-input>
+                <el-button v-on:click = "page_jump_to">跳转</el-button>
+              </div>
+            </div>
+
+
+
+
+
+            <div v-if = "current == 3" id = "about">
+              <h2>关于本软件</h2>
+              <hr/>
+              <h3>开发者</h3>
+              <p>主要贡献者:castle</p>
+              <h3>使用的开源项目</h3>
+              <a href="#">Vue 2.0</a><br/>
+              <a href="#">Element-UI</a><br/>
+              <a href="#">NeteaseCloudMusic-API</a><br/>
+            </div>
+
+
+        </el-main>
+        <el-footer>
+          <el-button type="primary" v-on:click = "songlist_save" style = "margin-left: 20px;">保存</el-button>
+            <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+            <el-checkbox v-model="d_song">歌曲</el-checkbox>
+            <el-select  multiple v-model="value" placeholder="请选择音质" style = "margin-right: 20px;">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+            </el-select> 
+            <el-checkbox v-model="d_lyric">歌词</el-checkbox>
+            <el-checkbox v-model="d_cover">封面</el-checkbox>
+          <!-- </el-checkbox-group> -->
+            <el-button type="primary" style = "margin-left: 20px;">下载</el-button>
+            <!-- <el-button @click="visible = true">Button</el-button>
+            <el-dialog :visible.sync="visible" title="Hello world">
+            <p>Try Element</p>
+            </el-dialog> -->
+        </el-footer>
+    </el-container>
+  </div>
+  <!-- Music Player -->
+  <div id = "player" @mouseenter = "hovered = true" @mouseleave = "hovered = false"> 
+   <audio :src="data.music_url" @canplay="showLong" ref = "audio" autoplay = ""
+   @timeupdate="getCurr" @pause="is_stop=true" @play="is_stop=false"></audio>
+   <div id = "player_icon" v-if = "hovered == false" :class="player_icon_display"></div>
+   <div id = "player-ui" v-if = "hovered">
+      <img id = "album-cover" :src="data.album_img"><br>
+      <div style="display: flex;flex-direction:row;">
+        <i  v-on:click = "plays" style="color: rgb(94, 96, 100);font-size: 28px;
+        cursor: pointer;margin-left: 10px;margin-right: 5px;
+        margin-top: 5px;" :class="player_icon_display"></i>
+        <div style="margin-top: 9px;margin-right: 15px;">{{toTime(current)}}</div>
+        <!-- <el-button style="margin-right: 20px;" circle icon="el-icon-video-play"></el-button> -->
+        <div style="width: calc(80% - 20px);">
+          <el-slider v-model="current" :max = "duration" :show-tooltip="false" @change="changeLong()"></el-slider> 
+        </div>
+      </div>
+      <p id = "title">{{data.title}}</p>
+      <p id = "artist">{{data.artist}}</p>
+      <p id = "album">{{data.album}}</p>
+   </div>
+  </div>
+  <script src="../js/page.js"></script>
 </body>
 </html>
