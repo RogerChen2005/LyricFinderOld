@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../js/vue.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <el-card v-for="i in searchlist" class="r-card" body-style="padding:10px;display: flex;
+                    flex-direction: row;align-items: center" shadow="hover">
+            <el-col :span="8">
+                <div class="hide_text" style="font-size: 20px;">{{i.title}}</div>
+            </el-col>
+            <el-col :span="6">
+                <div class="hide_text" style="font-size: 14px;">{{i.artists}}</div>
+            </el-col>
+            <el-col :span="6">
+                <div class="hide_text" style="font-size: 14px;">{{i.album}}</div>
+            </el-col>
+            <el-button v-on:click="listen_temporary(i)" style="margin-left: 20px;">预览</el-button>
+            <el-button v-on:click="add_item(i)" type="primary" style="margin-left: 20px;">添加</el-button>
+        </el-card>
+    </div>
+</body>
+<script>
+    var main = new Vue({
+        el: "#app",
+        data: {
+            searchlist: [{
+                title: "Test songname",
+                artists: "Test artists",
+                album: "Test album",
+                img_url: "https://p2.music.126.net/DwcM7ClereFuViGvbTHqRg==/19129303300302650.jpg"
+            }]
+        },
+        methods: {
+
+        }
+    });
+</script>
+<style>
+    .hide_text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+
+</html>

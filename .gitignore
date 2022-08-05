@@ -1,3 +1,5 @@
 node_modules/
 out/
-NeteaseCloudMusicApi/
+api/
+.vscode/
+html/usr_data/
