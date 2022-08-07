@@ -3,6 +3,7 @@ const path = require("path");
 const request = require("request");
 const fs = require("fs")
 const axios = require("axios");
+const marked = require("marked")
 
 const data_path = path.join(__dirname, "../../usr_data");
 const host = "http://localhost:3000/"
@@ -132,7 +133,7 @@ var download_path = "";
 
 function set_download_path(d_path){
     if (!fs.existsSync(path.join(d_path,"download"))) {
-        fs.mkdirSync(path.join(d_path,"download"))
+        fs.mkdirSync(path.join(d_path,"download"),{recursive:true});
         fs.mkdirSync(path.join(d_path,"download","song"));
         fs.mkdirSync(path.join(d_path,"download","cover"));
         fs.mkdirSync(path.join(d_path,"download","lyric"));
@@ -175,7 +176,7 @@ async function download_lyric(item) {
 module.exports.download_lyric = download_lyric;
 
 function download_cover(item) {
-    let stream = fs.createWriteStream(path.join(download_path,"download","cover",create_file_name(item.artists+" - "+item.title+".lrc")));
+    let stream = fs.createWriteStream(path.join(download_path,"download","cover",create_file_name(item.artists+" - "+item.title+".jpg")));
     request(item.img_url).pipe(stream);
 }
 module.exports.download_cover = download_cover
@@ -194,10 +195,10 @@ function send_captcha(phone_number){
 }
 module.exports.send_captcha = send_captcha
 
-function select_folder(){
-    var selected = dialog.showOpenDialogSync({
-      properties: ['openFile', 'openDirectory']
-    })
-    console.log(selected);
-  }
-  module.exports.select_folder = select_folder;
+function  generate_markdown(m_path,callback){
+    var temp = path.join(__dirname,m_path);
+    fs.readFile(temp,(err,data)=>{
+        callback(marked.marked(data.toString()));
+    });
+}
+module.exports.generate_markdown = generate_markdown;

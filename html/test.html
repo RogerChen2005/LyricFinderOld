@@ -14,32 +14,45 @@
 
 <body>
     <div id="app">
-        <el-card v-for="i in searchlist" class="r-card" body-style="padding:10px;display: flex;
-                    flex-direction: row;align-items: center" shadow="hover">
-            <el-col :span="8">
-                <div class="hide_text" style="font-size: 20px;">{{i.title}}</div>
-            </el-col>
-            <el-col :span="6">
-                <div class="hide_text" style="font-size: 14px;">{{i.artists}}</div>
-            </el-col>
-            <el-col :span="6">
-                <div class="hide_text" style="font-size: 14px;">{{i.album}}</div>
-            </el-col>
-            <el-button v-on:click="listen_temporary(i)" style="margin-left: 20px;">预览</el-button>
-            <el-button v-on:click="add_item(i)" type="primary" style="margin-left: 20px;">添加</el-button>
-        </el-card>
+        <div id="settings">
+            <h1>下载</h1>
+            <div style="padding-left: 2em;">
+                <el-row class="item">
+                    <el-col :span="10">
+                        <el-row style="font-size: 25px;font-weight: 300;">保存至原歌曲目录（开发中）</el-row>
+                        <el-row style="font-size: 12px;">开启后可将本地文件添加至原目录</el-row>
+                    </el-col>
+                    <el-col style="padding-top: 10px;" :span="14">
+                        <el-switch v-model="settings.save_to_origin" active-color="#13ce66"></el-switch>
+                    </el-col>
+                </el-row>
+                <el-row class="item">
+                    <el-col :span="6">
+                        <el-row style="font-size: 25px;font-weight: 300;">保存目录</el-row>
+                        <el-row style="font-size: 12px;">选择下载文件的保存目录</el-row>
+                    </el-col>
+                    <el-col style="margin-right: 10px;" :span="15">
+                        <el-input v-model="settings.download_path" placeholder="请输入内容"></el-input>
+                    </el-col>
+                    <el-col :span="2">
+                        <el-button type="primary" v-on:click="select_folder">选择文件夹</el-button>
+                    </el-col>
+                </el-row>
+            </div>
+            <h1>关于本软件</h1>
+            <div style="padding-left: 2em;"></div>
+        </div>
+    </div>
     </div>
 </body>
 <script>
     var main = new Vue({
         el: "#app",
         data: {
-            searchlist: [{
-                title: "Test songname",
-                artists: "Test artists",
-                album: "Test album",
-                img_url: "https://p2.music.126.net/DwcM7ClereFuViGvbTHqRg==/19129303300302650.jpg"
-            }]
+            settings: {
+                save_to_origin: false,
+                download_path: "",
+            }
         },
         methods: {
 
@@ -51,6 +64,18 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+    }
+
+    #settings .item {
+        margin-bottom: 20px;
+    }
+
+    #settings .item:last-child {
+        margin-bottom: 0;
+    }
+
+    #settings h1 {
+        font-weight: 300;
     }
 </style>
 

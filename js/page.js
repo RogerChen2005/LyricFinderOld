@@ -13,11 +13,12 @@ const {
   set_download_path,
   download_song,
   send_captcha,
-  select_folder
+  generate_markdown
 } = require("../js/funcs.js")
 
 const path = require("path")
 const { ipcRenderer } = require('electron')
+
 
 var player = new Vue({
   el: "#player",
@@ -79,7 +80,7 @@ var mainv = new Vue({
       activeIndex: '1',
       activeIndex2: '1',
       song_list: [],
-      bitrate:[],
+      bitrate: ["无损"],
       checkList: [],
       checkAll: false,
       checked: [],
@@ -88,9 +89,11 @@ var mainv = new Vue({
       d_lyric: true,
       d_cover: true,
       search_loading: true,
-      options: [{value: "128000",label: '128kbps MP3'}, {
-            value: '320000',label: '320kbps MP3'}, {
-            value: '999000',label: '无损'}],
+      options: [{ value: "128000", label: '128kbps MP3' }, {
+        value: '320000', label: '320kbps MP3'
+      }, {
+        value: '999000', label: '无损'
+      }],
 
       /* search*/
       searchlist: [],
@@ -114,28 +117,29 @@ var mainv = new Vue({
       cookie: "",
       avatar_img: "",
       user_id: "",
-      qrimg:"",
+      qrimg: "",
 
       /*User List*/
-      user_list:[],
-      has_get_user_list:false,
+      user_list: [],
+      has_get_user_list: false,
 
       /*Song List Drawer*/
       drawer: {
-        visible:false,
-        list:[],
-        list_name:"",
-        current_count:0,
-        total_count:0,
-        id:""
+        visible: false,
+        list: [],
+        list_name: "",
+        current_count: 0,
+        total_count: 0,
+        id: ""
       },
-      drawer_loading:false,
+      drawer_loading: false,
 
       /*settings*/
-      settings:{
-        save_to_origin:false,
-        download_path:path.join(__dirname,"../../download")
-      }
+      settings: {
+        save_to_origin: false,
+        download_path: path.join(__dirname, "../../")
+      },
+      README: ""
     }
   },
   methods: {
@@ -161,7 +165,7 @@ var mainv = new Vue({
       });
     },
     handleCheckAllChange(val) {
-      this.checkList = val?Array.from({length: this.song_list.length}, (v, i) => i):[]; 
+      this.checkList = val ? Array.from({ length: this.song_list.length }, (v, i) => i) : [];
       this.isIndeterminate = false;
     },
     handleCheckedChange(value) {
@@ -170,7 +174,7 @@ var mainv = new Vue({
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.song_list.length;
     },
     onLogin() {
-      user_login(this.login.phone_number, this.login.password,this.login.captcha,(result) => {
+      user_login(this.login.phone_number, this.login.password, this.login.captcha, (result) => {
         if (result.code == 502) {
           this.error_msg("用户名或者密码错误");
         }
@@ -208,11 +212,11 @@ var mainv = new Vue({
       songlistids.splice(index, 1);
     },
     add_item(item) {
-      if(songlistids.indexOf(item.id) != -1){
+      if (songlistids.indexOf(item.id) != -1) {
         this.error_msg("不能重复添加同一首歌曲");
         return;
       }
-      if (item.img_url){
+      if (item.img_url) {
         this.song_list.push(item);
         songlistids.push(item.id);
       }
@@ -231,70 +235,70 @@ var mainv = new Vue({
       save_profile("settings", this.settings);
       this.success_nf("已保存");
     },
-    get_user_list(){
-      if(this.has_get_user_list){
+    get_user_list() {
+      if (this.has_get_user_list) {
         return;
       }
-      else if(this.user_id == ""){
+      else if (this.user_id == "") {
         error_msg("请先登录");
       }
-      else{
-        get_userlist(this.user_id,(data)=>{
+      else {
+        get_userlist(this.user_id, (data) => {
           this.has_get_user_list = true;
           this.user_list = data;
         })
       }
     },
-    open_drawer(item){
+    open_drawer(item) {
       this.drawer.visible = true;
       this.drawer_loading = true;
       this.drawer.current_count = 0;
       this.drawer.id = item.id;
       this.drawer.list_name = item.list_name;
       this.drawer.total_count = item.total;
-      get_list_song(item.id,this.drawer.current_count,this.cookie,(data)=>{
+      get_list_song(item.id, this.drawer.current_count, this.cookie, (data) => {
         console.log(data);
         this.drawer.list = data;
         this.drawer.current_count = 30;
         this.drawer_loading = false;
       });
     },
-    drawer_load(){
+    drawer_load() {
       this.drawer_loading = true;
-      get_list_song(this.drawer.id,this.drawer.current_count,this.cookie,(data)=>{
+      get_list_song(this.drawer.id, this.drawer.current_count, this.cookie, (data) => {
         this.drawer.list = this.drawer.list.concat(data);
         this.drawer.visible = true;
         this.drawer.current_count += 30;
         this.drawer_loading = false;
       });
     },
-    download(){
+    download() {
       set_download_path(this.settings.download_path);
-      if(this.d_cover){
-        this.checkList.map( (index) =>{
+      if (this.d_cover) {
+        this.checkList.map((index) => {
           download_cover(this.song_list[index]);
         })
       }
-      if(this.d_lyric){
-        this.checkList.map( (index)=>{
+      if (this.d_lyric) {
+        this.checkList.map((index) => {
           download_lyric(this.song_list[index]);
         })
       }
-      if(this.d_song){
-        for(var br of this.bitrate){
-          this.checkList.map( (index)=>{
-            download_song(this.song_list[index],br,this.cookie)
+      if (this.d_song) {
+        for (var br of this.bitrate) {
+          this.checkList.map((index) => {
+            download_song(this.song_list[index], br, this.cookie)
           })
         }
       }
       this.success_nf("下载成功");
     },
-    select_folder(){
+    select_folder() {
       ipcRenderer.send('open-dialog', 'ping');
     }
   },
   computed: {
-    NoMore(){
+    NoMore() {
       return this.drawer.current_count >= this.drawer.total_count;
     },
     load_disabled() {
@@ -307,15 +311,15 @@ ipcRenderer.on('path-reply', (event, arg) => {
   mainv.settings.download_path = arg;
 });
 
-read_profile("songlist",(data)=>{
-    mainv.song_list = data;
-    data.map((item)=>{
-      songlistids.push(item.id);
-    })
-    mainv.loading = false;
+read_profile("songlist", (data) => {
+  mainv.song_list = data;
+  data.map((item) => {
+    songlistids.push(item.id);
+  })
+  mainv.loading = false;
 })
 
-read_profile("user",(data)=>{
+read_profile("user", (data) => {
   mainv.cookie = data.cookie;
   mainv.login.phone_number = data.phone_number
   mainv.login.password = data.password
@@ -323,7 +327,7 @@ read_profile("user",(data)=>{
   mainv.user_id = data.user_id
 })
 
-read_profile("settings",(data)=>{
+read_profile("settings", (data) => {
   mainv.settings = data;
 })
 
@@ -336,3 +340,7 @@ async function showW() {
   // mainv.qrimg = result2.body.data.qrimg;
   mainv.dialogVisible = true;
 }
+
+generate_markdown("../README.md",(data)=>{
+  mainv.README = data;
+});

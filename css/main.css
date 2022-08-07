@@ -128,9 +128,6 @@ right: 0;
     transform: translateY(-10px);
 }
 
-#setting h1{
-    font-size: 35px;
-}
 
 .hide_text{
     white-space: nowrap;
@@ -139,4 +136,17 @@ right: 0;
 }
 .el-col{
     overflow: hidden;
+}
+
+#settings .item {
+    margin-bottom: 20px;
+}
+
+#settings .item:last-child {
+    margin-bottom: 0;
+}
+
+#settings .title {
+    font-weight: 300;
+    font-size: 30px;
 }

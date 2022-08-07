@@ -142,7 +142,7 @@
               </div>
             </el-main>
 
-            <el-footer style="margin-top: 20px;" height="40px">
+            <el-footer style="margin-top: 20px;" height="45px">
               <el-button v-on:click="next_page" type="primary">下一页</el-button>
               <el-input v-model="page_number" placeholder="请输入页码"
                 style="width: 200px;margin-left:20px;margin-right: 20px;"></el-input>
@@ -203,22 +203,39 @@
   </div>
 
   <div v-if="current == 4" id="settings">
-    <div>
-       <div>
-          保存至原歌曲目录
-       </div> <el-switch v-model="settings.save_to_origin" active-color="#13ce66"></el-switch>
-       <div> 保存目录<el-input v-model="settings.download_path" placeholder="请输入内容"></el-input>
-        <el-button type = "primary" v-on:click = "select_folder"></el-button>
+    <div id="settings">
+      <h1 class="title">下载</h1>
+      <div style="padding-left: 2em;padding-right: 2em;">
+        <el-row class="item">
+          <el-col :span="10">
+            <el-row style="font-size: 25px;font-weight: 300;">保存至原歌曲目录（开发中）</el-row>
+            <el-row style="font-size: 12px;">开启后可将本地文件添加至原目录</el-row>
+          </el-col>
+          <el-col style="padding-top: 10px;" :span="14">
+            <el-switch disabled v-model="settings.save_to_origin" active-color="#13ce66"></el-switch>
+          </el-col>
+        </el-row>
+        <el-row class="item">
+          <el-col :span="6">
+            <el-row style="font-size: 25px;font-weight: 300;">保存目录</el-row>
+            <el-row style="font-size: 12px;">选择下载文件的保存目录</el-row>
+          </el-col>
+          <el-col style="margin-right: 10px;" :span="14">
+            <el-input v-model="settings.download_path" placeholder="请输入内容"></el-input>
+          </el-col>
+          <el-col :span="2" style="overflow:visible;">
+            <el-button type="primary" v-on:click="select_folder">选择文件夹</el-button>
+          </el-col>
+        </el-row>
+      </div>
+      <h1 class="title">关于本软件</h1>
+      <div style="padding-left: 2em;padding-right: 2em;">
+        <el-row style="font-size: 25px;font-weight: 300;margin-bottom: 10px;">README.md</el-row>
+        <div v-html="README"
+          style="padding-left: 2em;padding-right: 2em;border: 1px solid rgb(177, 177, 177);border-radius: 10px;">
+        </div>
       </div>
     </div>
-    <h1>关于本软件</h1>
-    <hr />
-    <h3>开发者</h3>
-    <p>主要贡献者:castle</p>
-    <h3>使用的开源项目</h3>
-    <a href="#">Vue 2.0</a><br />
-    <a href="#">Element-UI</a><br />
-    <a href="#">NeteaseCloudMusic-API</a><br />
   </div>
 
 
@@ -234,7 +251,7 @@
     <el-checkbox v-model="d_lyric">歌词</el-checkbox>
     <el-checkbox v-model="d_cover">封面</el-checkbox>
     </el-checkbox-group>
-    <el-button v-on:click = "download" type="primary" style="margin-left: 20px;">下载</el-button>
+    <el-button v-on:click="download" type="primary" style="margin-left: 20px;">下载</el-button>
   </el-footer>
   </el-container>
   </div>
