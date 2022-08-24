@@ -2,7 +2,8 @@ const {
     app,
     BrowserWindow,
     ipcMain,
-    dialog
+    dialog,
+    Menu
 } = require("electron")
 
 require("./api/server").serveNcmApi({
@@ -12,14 +13,15 @@ require("./api/server").serveNcmApi({
 var MainWindow;
 
 const createWindow = function () {
+    Menu.setApplicationMenu(null);
     MainWindow = new BrowserWindow({
-        width: 1000,
+        width: 1050,
         height: 800,
         webPreferences: {
             nodeIntegration: true,
             // 官网似乎说是默认false，但是这里必须设置contextIsolation
             contextIsolation: false,
-            webSecurity: false,
+            
             nodeIntegrationInWorker: true,
             // preload : path.join(__dirname, "js/funcs.js")
         }

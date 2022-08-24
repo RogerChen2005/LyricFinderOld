@@ -1,6 +1,6 @@
 {
   "name": "lyric-finder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "None",
   "main": "main.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "element-ui": "^2.15.9",
     "marked": "^4.0.18",
+    "node-taglib-sharp": "^5.0.0",
     "request": "^2.88.2",
     "vue": "^3.2.37"
   },
@@ -32,7 +33,9 @@
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "./out/icon.ico"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

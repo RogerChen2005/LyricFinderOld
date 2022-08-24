@@ -4,6 +4,7 @@ const request = require("request");
 const fs = require("fs")
 const axios = require("axios");
 const marked = require("marked")
+const taglib = require("node-taglib-sharp")
 
 const data_path = path.join(__dirname, "../../usr_data");
 const host = "http://localhost:3000/"
@@ -131,18 +132,26 @@ module.exports.get_result = get_result;
 
 var download_path = "";
 
-function set_download_path(d_path){
+function set_download_path(d_path,classify){
     if (!fs.existsSync(path.join(d_path,"download"))) {
         fs.mkdirSync(path.join(d_path,"download"),{recursive:true});
-        fs.mkdirSync(path.join(d_path,"download","song"));
-        fs.mkdirSync(path.join(d_path,"download","cover"));
-        fs.mkdirSync(path.join(d_path,"download","lyric"));
+    }
+    if(classify){
+        if(!fs.existsSync(path.join(d_path,"download","song"))){
+            fs.mkdirSync(path.join(d_path,"download","song"));
+        } 
+        if(!fs.existsSync(path.join(d_path,"download","cover"))){
+            fs.mkdirSync(path.join(d_path,"download","cover"));
+        }
+        if(!fs.existsSync(path.join(d_path,"download","lyric"))){
+            fs.mkdirSync(path.join(d_path,"download","lyric"));
+        } 
     }
     download_path = d_path;
 }
 module.exports.set_download_path = set_download_path;
 
-async function download_lyric(item) {
+async function download_lyric(item,classify,callback) {
     try {
         let output = item.artists + " - " + item.title;
         var result = await axios.get(host + "lyric?id=" + item.id);
@@ -163,11 +172,15 @@ async function download_lyric(item) {
                         j++;
                     }
                 }
-                fs.writeFileSync(path.join(download_path,"download","lyric",create_file_name(output + ".lrc")), str);
+                var save_path = classify?path.join(download_path,"download","lyric",create_file_name(output + ".lrc")):path.join(download_path,"download",create_file_name(output + ".lrc"));
+                fs.writeFileSync(save_path, str);
+                callback();
                 return;
             }
         }
-        fs.writeFileSync(path.join(download_path,"download","lyric",create_file_name(output + ".lrc")),body.lrc.lyric);
+        var save_path = classify?path.join(download_path,"download","lyric",create_file_name(output + ".lrc")):path.join(download_path,"download",create_file_name(output + ".lrc"));
+        fs.writeFileSync(save_path,body.lrc.lyric);
+        callback();
     } catch (error) {
         console.log(error);
     }
@@ -175,17 +188,44 @@ async function download_lyric(item) {
 
 module.exports.download_lyric = download_lyric;
 
-function download_cover(item) {
-    let stream = fs.createWriteStream(path.join(download_path,"download","cover",create_file_name(item.artists+" - "+item.title+".jpg")));
+function download_cover(item,classify,callback) {
+    let output = item.artists + " - " + item.title;
+    var save_path = classify?path.join(download_path,"download","cover",create_file_name(output + ".jpg")):path.join(download_path,"download",create_file_name(output + ".jpg"));
+    let stream = fs.createWriteStream(save_path);
     request(item.img_url).pipe(stream);
+    stream.on("finish",callback());
 }
 module.exports.download_cover = download_cover
 
-async function download_song(item,br,cookie) {
+async function download_song(item,br,cookie,classify,save_img,callback) {
+    let output = item.artists + " - " + item.title;
     var result =  await axios.get(host+"song/url?id="+item.id+"&br="+br+"&cookie="+cookie);
     var body = result.data.data[0];
-    let stream = fs.createWriteStream(path.join(download_path,"download","song",create_file_name(item.artists+" - "+item.title+"."+body.type)));
+    var save_path = classify?path.join(download_path,"download","song",create_file_name(output+"."+body.type)):path.join(download_path,"download",create_file_name(output+"."+body.type));
+    let stream = fs.createWriteStream(save_path);
     request(body.url).pipe(stream);
+    stream.on("finish",()=>{
+        axios({
+            url: item.img_url,
+            method: 'GET',
+            responseType: 'arraybuffer'
+        }).then((body) => {
+            data = taglib.ByteVector.fromByteArray(Buffer.from(body.data, "utf-8"));
+            if(save_img){
+                fs.writeFileSync(classify?path.join(download_path,"download","cover",create_file_name(output + ".jpg")):path.join(download_path,"download",create_file_name(output + ".jpg")),Buffer.from(body.data));
+                callback();
+            }
+            var i = taglib.Picture.fromFullData(data, taglib.PictureType.FrontCover, "image/jpeg", "generate by lyric-finder");
+            var dest = taglib.File.createFromPath(save_path)
+            dest.tag.pictures = [i];
+            dest.tag.title = item.title;
+            dest.tag.album = item.album;
+            dest.tag.performers = item.artists.split(",");
+            dest.save();
+            dest.dispose();
+            callback();
+        })
+    })
 }
 module.exports.download_song = download_song;
 

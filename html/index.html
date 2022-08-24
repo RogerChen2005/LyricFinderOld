@@ -19,14 +19,23 @@
 </head>
 
 <body>
+  <!-- download detail -->
+  <div id="download">
+    <el-dialog title="下载详情" :visible.sync="download_dialog_visible">
+      <el-progress :percentage="percentage" :color="progress_colors"></el-progress>
+      <br />
+      <el-button type="primary" @click="download_dialog_visible = false">隐藏</el-button>
+    </el-dialog>
+  </div>
   <div id="app">
     <el-container>
       <el-header>
-        <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal">
+        <el-menu class="el-menu-demo" mode="horizontal">
           <el-menu-item index="1" v-on:click="current = 1">主页</el-menu-item>
           <el-menu-item index="2" v-on:click="current = 2">搜索</el-menu-item>
           <el-menu-item index="3" v-on:click="current = 3;get_user_list()">我的歌单</el-menu-item>
           <el-menu-item index="4" v-on:click="current = 4">设置</el-menu-item>
+          <el-menu-item index="5" v-on:click="current = 5">工具箱</el-menu-item>
 
           <el-avatar onclick="showW()" style="cursor: pointer;" id="avatar" :size="40" :src="avatar_img"></el-avatar>
 
@@ -60,44 +69,55 @@
 
 
 
-        <div v-if="current == 1">
-          <div>
-            <el-skeleton :rows="10" :loading="loading" animated>
-              <template slot="template">
-
-              </template>
-              <template>
-                <el-checkbox-group v-model="checkList" @change="handleCheckedChange">
-                  <el-card v-for="(i,index) in song_list" class="r-card" body-style="padding:10px;height:80px;display: flex;
-        flex-direction: row;align-items: center" shadow="hover">
-                    <img style="margin-right:20px;" width="80px" height="80px" title="cover" :src="i.img_url">
-                    <el-col :span="15">
-                      <el-row>
-                        <div class="hide_text" style="color: #303133;letter-spacing: 1px; font-size: 30px;">{{i.title}}
-                        </div>
-                      </el-row>
-                      <el-row>
-                        <el-col :span="12">
-                          <div class="hide_text" style="color: #606266; font-size: 18px;font-weight: 400;">{{i.artists}}
-                          </div>
+        <div v-if="current == 1" style="height: 100%; overflow: hidden;">
+          <el-container v-loading="loading" style="height: 100%;">
+            <el-header height="45px">
+              <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选
+              </el-checkbox>
+              <el-button style="margin-left: 20px;" v-on:click="delete_all" type="danger" size="small">
+                删除全部
+              </el-button>
+            </el-header>
+            <el-main>
+              <el-checkbox-group v-model="checkList" @change="handleCheckedChange">
+                <el-card v-for="(i,index) in song_list" class="r-card" body-style="padding:0;" shadow="hover">
+                  <div style="height:80px;display: flex;
+                flex-direction: row;align-items: center;">
+                    <el-col :span="18" >
+                      <div style="display: flex;
+                      flex-direction: row;height: 80px;align-items: center;cursor: pointer;"
+                        v-on:click="handleCheckedSelect(index)">
+                        <img style="margin-right:20px;" width="80px" height="80px" title="cover" :src="i.img_url">
+                        <el-col :span="22">
+                          <el-row>
+                            <div class="hide_text" style="color: #303133;letter-spacing: 1px; font-size: 30px;">
+                              {{i.title}}
+                            </div>
+                          </el-row>
+                          <el-row>
+                            <el-col :span="12">
+                              <div class="hide_text" style="color: #606266; font-size: 18px;font-weight: 400;">
+                                {{i.artists}}
+                              </div>
+                            </el-col>
+                            <el-col :span="12">
+                              <div class="hide_text" style="color: #606266;font-size: 18px;font-weight: 400;">
+                                {{i.album}}
+                              </div>
+                            </el-col>
+                          </el-row>
                         </el-col>
-                        <el-col :span="12">
-                          <div class="hide_text" style="color: #606266;font-size: 18px;font-weight: 400;">{{i.album}}
-                          </div>
-                        </el-col>
-                      </el-row>
+                      </div>
                     </el-col>
                     <el-button v-on:click="delete_item(index)" type="danger">删除</el-button>
                     <el-button v-on:click="listen_temporary(i)" style="margin-right: 20px;">预览</el-button>
                     <el-checkbox :label="index">选择</el-checkbox>
-                  </el-card>
-                </el-checkbox-group>
-                <!-- 加载完毕 -->
-              </template>
-            </el-skeleton>
-          </div>
+                  </div>
+                </el-card>
+              </el-checkbox-group>
+            </el-main>
+          </el-container>
         </div>
-
 
 
 
@@ -162,8 +182,8 @@
           </el-card>
           <el-drawer size="70%" :title="drawer.list_name" :visible.sync="drawer.visible" style="overflow:auto;">
             <el-container style="height: 100%;">
-              <el-header height="20px">
-                <div style="height:20px;margin-bottom: 10px;padding-left: 10px;display: flex;">
+              <el-header height="40px">
+                <div style="height:20px;margin-bottom: 30px;padding-left: 10px;display: flex;">
                   <el-col :span="8">
                     <div class="hide_text" style="color: #606266;">标题</div>
                   </el-col>
@@ -173,7 +193,9 @@
                   <el-col :span="6">
                     <div class="hide_text" style="color: #606266;">专辑</div>
                   </el-col>
-                  <div style="width: 230px;"></div>
+                  <div style="width: 230px;">
+                    <el-button type="primary" v-on:click="add_all" size="mini">添加全部</el-button>
+                  </div>
                 </div><br />
               </el-header>
               <el-main>
@@ -208,11 +230,11 @@
       <div style="padding-left: 2em;padding-right: 2em;">
         <el-row class="item">
           <el-col :span="10">
-            <el-row style="font-size: 25px;font-weight: 300;">保存至原歌曲目录（开发中）</el-row>
-            <el-row style="font-size: 12px;">开启后可将本地文件添加至原目录</el-row>
+            <el-row style="font-size: 25px;font-weight: 300;">分文件夹存放</el-row>
+            <el-row style="font-size: 12px;">开启后可将歌词，封面，歌曲存放至不同的子文件夹</el-row>
           </el-col>
           <el-col style="padding-top: 10px;" :span="14">
-            <el-switch disabled v-model="settings.save_to_origin" active-color="#13ce66"></el-switch>
+            <el-switch v-model="settings.classify" active-color="#13ce66"></el-switch>
           </el-col>
         </el-row>
         <el-row class="item">
@@ -238,11 +260,14 @@
     </div>
   </div>
 
+  <div v-if="current == 5">
+    正在开发中
+  </div>
+
 
   </el-main>
   <el-footer style="margin-top:5px;">
     <el-button type="primary" v-on:click="songlist_save" style="margin-right: 20px;">保存</el-button>
-    <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
     <el-checkbox v-model="d_song">歌曲</el-checkbox>
     <el-select multiple v-model="bitrate" placeholder="请选择音质" style="margin-right: 20px;">
       <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
@@ -256,7 +281,7 @@
   </el-container>
   </div>
   <!-- Music Player -->
-  <div id="player" @mouseenter="hovered = true" @mouseleave="hovered = false">
+  <div v-if="visible" id="player" @mouseenter="hovered = true" @mouseleave="hovered = false">
     <audio :src="data.music_url" @canplay="showLong" ref="audio" autoplay="" @timeupdate="getCurr" @pause="is_stop=true"
       @play="is_stop=false"></audio>
     <div id="player_icon" v-if="hovered == false" :class="player_icon_display"></div>
@@ -277,7 +302,6 @@
       <p id="album">{{data.album}}</p>
     </div>
   </div>
-
   <script src="../js/page.js"></script>
 </body>
 

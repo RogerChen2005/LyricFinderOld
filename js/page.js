@@ -28,7 +28,8 @@ var player = new Vue({
     data: { album_img: "", artist: "", album: "", title: "", music_url: "#" },
     current: 0,
     duration: 100,
-    is_stop: true
+    is_stop: true,
+    visible:false
   },
   methods: {
     toTime(sec) { //秒数转化为mm:ss形式
@@ -63,10 +64,51 @@ var player = new Vue({
       this.data = data
       this.player_icon_display = "el-icon-video-pause";
       this.is_stop = false;
+      if(this.visible == false){
+        this.visible = true;
+      }
     }
   }
 });
 
+var download = new Vue({
+  el:"#download",
+  data(){
+    return{
+      total_download:1,
+      current_downloaded:0,
+      download_dialog_visible:false,
+      progress_colors: [
+        {color: '#f56c6c', percentage: 20},
+        {color: '#e6a23c', percentage: 40},
+        {color: '#5cb87a', percentage: 60},
+        {color: '#1989fa', percentage: 80},
+        {color: '#6f7ad3', percentage: 100}
+      ],
+      percentage:0,
+    }
+  },
+  methods:{
+    init(count){
+      this.total_download = count;
+      this.current_downloaded = 0
+      this.percentage = 0;
+      this.download_dialog_visible = true;
+    },
+    add(){
+      this.current_downloaded += 1;
+      this.percentage = parseInt((this.current_downloaded / this.total_download) * 100);
+      if(this.percentage == 100){
+        this.download_dialog_visible = false;
+        this.$notify({
+          title: '成功',
+          message: "下载完成",
+          type: 'success'
+        });
+      }
+    },
+  }
+})
 
 var songlistids = [];
 
@@ -77,23 +119,26 @@ var mainv = new Vue({
       current: 1,
       loading: true,
       // visible: false ,
-      activeIndex: '1',
-      activeIndex2: '1',
       song_list: [],
-      bitrate: ["无损"],
-      checkList: [],
-      checkAll: false,
-      checked: [],
-      isIndeterminate: false,
-      d_song: true,
-      d_lyric: true,
-      d_cover: true,
+      bitrate: ["999000"],
       search_loading: true,
       options: [{ value: "128000", label: '128kbps MP3' }, {
         value: '320000', label: '320kbps MP3'
       }, {
         value: '999000', label: '无损'
       }],
+
+      /*download*/
+      d_song: true,
+      d_lyric: true,
+      d_cover: true,
+
+      /*check*/
+      checkList: [],
+      checkAll: false,
+      checked: [],
+      isIndeterminate: false,
+      pre_selected: 0,
 
       /* search*/
       searchlist: [],
@@ -136,7 +181,7 @@ var mainv = new Vue({
 
       /*settings*/
       settings: {
-        save_to_origin: false,
+        classify: true,
         download_path: path.join(__dirname, "../../")
       },
       README: ""
@@ -172,6 +217,27 @@ var mainv = new Vue({
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.song_list.length;
       this.isIndeterminate = checkedCount > 0 && checkedCount < this.song_list.length;
+    },
+    handleCheckedSelect(index) {
+      console.log("a")
+      if (event.shiftKey) {
+        console.log(this.pre_selected,index)
+        for(var i = this.pre_selected;i<=index;i++){
+          if(this.checkList.indexOf(i)==-1){
+            this.checkList.push(i);
+          }
+        }
+      }
+      else {
+        var exist = this.checkList.indexOf(index);
+        if (exist != -1) {
+          this.checkList.splice(exist, 1);
+        }
+        else {
+          this.checkList.push(index);
+          this.pre_selected = index;
+        }
+      }
     },
     onLogin() {
       user_login(this.login.phone_number, this.login.password, this.login.captcha, (result) => {
@@ -236,12 +302,8 @@ var mainv = new Vue({
       this.success_nf("已保存");
     },
     get_user_list() {
-      if (this.has_get_user_list) {
-        return;
-      }
-      else if (this.user_id == "") {
-        error_msg("请先登录");
-      }
+      if (this.has_get_user_list) { return; }
+      else if (this.user_id == "") { error_msg("请先登录"); }
       else {
         get_userlist(this.user_id, (data) => {
           this.has_get_user_list = true;
@@ -273,28 +335,59 @@ var mainv = new Vue({
       });
     },
     download() {
-      set_download_path(this.settings.download_path);
-      if (this.d_cover) {
-        this.checkList.map((index) => {
-          download_cover(this.song_list[index]);
-        })
-      }
+      set_download_path(this.settings.download_path, this.settings.classify);
+      var cnt = 0;
       if (this.d_lyric) {
         this.checkList.map((index) => {
-          download_lyric(this.song_list[index]);
+          download_lyric(this.song_list[index], this.settings.classify,()=>{download.add()});
+          cnt+=1;
         })
       }
       if (this.d_song) {
         for (var br of this.bitrate) {
           this.checkList.map((index) => {
-            download_song(this.song_list[index], br, this.cookie)
+            download_song(this.song_list[index], br, this.cookie, this.settings.classify,this.d_cover,()=>{download.add()})
+            cnt+=1;
+            if(this.d_cover){
+              cnt+=1;
+            }
           })
         }
       }
-      this.success_nf("下载成功");
+      else if (this.d_cover) {
+        this.checkList.map((index) => {
+          download_cover(this.song_list[index], this.settings.classify,()=>{download.add()});
+          cnt+=1;
+        })
+      }
+      // this.success_nf("下载成功");
+      download.init(cnt);
     },
     select_folder() {
       ipcRenderer.send('open-dialog', 'ping');
+    },
+    delete_all(){
+      this.$confirm('此操作将删除列表中所有歌曲, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.song_list = [];
+        this.$message({
+          type: 'success',
+          message: '已删除'
+        });
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        });          
+      })
+    },
+    add_all(){
+      for(var i of this.drawer.list){
+        this.add_item(i);
+      }
     }
   },
   computed: {
@@ -341,6 +434,6 @@ async function showW() {
   mainv.dialogVisible = true;
 }
 
-generate_markdown("../README.md",(data)=>{
+generate_markdown("../README.md", (data) => {
   mainv.README = data;
 });

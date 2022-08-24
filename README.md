@@ -2,6 +2,22 @@
 
 ---
 
+## Update 近期更新
+
+###8.24 1.01 build 22801
+
+1、下载歌曲将自动写入歌曲元数据
+
+Metadata will automatically apply to downloaded songs.
+
+2、新增下载进度
+
+Add download progress.
+
+3、优化批量操作
+
+Better bulk operations.
+
 ## Overview 总览
 
 此软件免费并开源
@@ -12,7 +28,7 @@ This is a free and open-source software by [castle](https://rogerchen2005.github
 
 1、**从网易音乐下载歌曲，封面，歌词**
 
-**Download songs,covers,lyrics from NCM (Main Function)**\
+**Download songs,covers,lyrics from NCM (Main Function)**
 
 2、登陆并查看个人歌单
 
