@@ -13,7 +13,7 @@ require("./api/server").serveNcmApi({
 var MainWindow;
 
 const createWindow = function () {
-    Menu.setApplicationMenu(null);
+    // Menu.setApplicationMenu(null);
     MainWindow = new BrowserWindow({
         width: 1050,
         height: 800,

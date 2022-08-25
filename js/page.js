@@ -13,11 +13,13 @@ const {
   set_download_path,
   download_song,
   send_captcha,
-  generate_markdown
+  generate_markdown,
+  lyric_finder,
+  cover_finder
 } = require("../js/funcs.js")
 
 const path = require("path")
-const { ipcRenderer } = require('electron')
+const { ipcRenderer } = require('electron');
 
 
 var player = new Vue({
@@ -90,6 +92,9 @@ var download = new Vue({
   },
   methods:{
     init(count){
+      if(count == 0){
+        return;
+      }
       this.total_download = count;
       this.current_downloaded = 0
       this.percentage = 0;
@@ -319,7 +324,6 @@ var mainv = new Vue({
       this.drawer.list_name = item.list_name;
       this.drawer.total_count = item.total;
       get_list_song(item.id, this.drawer.current_count, this.cookie, (data) => {
-        console.log(data);
         this.drawer.list = data;
         this.drawer.current_count = 30;
         this.drawer_loading = false;
@@ -364,7 +368,9 @@ var mainv = new Vue({
       download.init(cnt);
     },
     select_folder() {
-      ipcRenderer.send('open-dialog', 'ping');
+      get_folder((path)=>{
+        this.settings.download_path = path;
+      })
     },
     delete_all(){
       this.$confirm('此操作将删除列表中所有歌曲, 是否继续?', '提示', {
@@ -373,6 +379,7 @@ var mainv = new Vue({
         type: 'warning'
       }).then(() => {
         this.song_list = [];
+        songlistids = [];
         this.$message({
           type: 'success',
           message: '已删除'
@@ -388,6 +395,16 @@ var mainv = new Vue({
       for(var i of this.drawer.list){
         this.add_item(i);
       }
+    },
+    find_lyric(){
+      get_folder((path)=>{
+        lyric_finder(path,download.add,download.init);
+      });
+    },
+    find_cover(){
+      get_folder((path)=>{
+        cover_finder(path,download.add,download.init)
+      })
     }
   },
   computed: {
@@ -400,9 +417,12 @@ var mainv = new Vue({
   },
 });
 
-ipcRenderer.on('path-reply', (event, arg) => {
-  mainv.settings.download_path = arg;
-});
+function get_folder(callback){
+  ipcRenderer.send('open-dialog', 'ping');
+  ipcRenderer.once('path-reply', (event, arg) => {
+    callback(arg);
+  });
+}
 
 read_profile("songlist", (data) => {
   mainv.song_list = data;

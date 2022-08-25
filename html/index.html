@@ -83,7 +83,7 @@
                 <el-card v-for="(i,index) in song_list" class="r-card" body-style="padding:0;" shadow="hover">
                   <div style="height:80px;display: flex;
                 flex-direction: row;align-items: center;">
-                    <el-col :span="18" >
+                    <el-col :span="18">
                       <div style="display: flex;
                       flex-direction: row;height: 80px;align-items: center;cursor: pointer;"
                         v-on:click="handleCheckedSelect(index)">
@@ -262,6 +262,34 @@
 
   <div v-if="current == 5">
     正在开发中
+    <el-card class="r-card" body-style="padding:10px;display: flex;
+                    flex-direction: row;align-items: center" shadow="hover">
+      <el-col :span="19">
+        <el-row>
+          <div class="hide_text" style="font-size: 20px;">自动为文件夹中歌曲匹配歌词</div>
+        </el-row>
+        <el-row>
+          <div class="hide_text" style="font-size: 10px;">有几率匹配不准确</div>
+        </el-row>
+      </el-col>
+      <el-col :span="4">
+        <el-button v-on:click="find_lyric" type = "primary">开始</el-button>
+      </el-col>
+    </el-card>
+    <el-card class="r-card" body-style="padding:10px;display: flex;
+                    flex-direction: row;align-items: center" shadow="hover">
+      <el-col :span="19">
+        <el-row>
+          <div class="hide_text" style="font-size: 20px;">自动为文件夹中歌曲添加封面</div>
+        </el-row>
+        <el-row>
+          <div class="hide_text" style="font-size: 10px;">如果存在封面会自动跳过</div>
+        </el-row>
+      </el-col>
+      <el-col :span="4">
+        <el-button v-on:click="find_cover" type = "primary">开始</el-button>
+      </el-col>
+    </el-card>
   </div>
 
 

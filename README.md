@@ -4,7 +4,21 @@
 
 ## Update 近期更新
 
-###8.24 1.01 build 22801
+### 8.25 1.01 build 22802
+
+1、修复若干Bug
+
+Fixed several bugs
+
+2、新增匹配歌词功能
+
+New function:match lyrics to local files
+
+3、新增匹配封面功能
+
+New function:match covers to local files
+
+### 8.24 1.01 build 22801
 
 1、下载歌曲将自动写入歌曲元数据
 
@@ -68,6 +82,10 @@ electron .
 
 1、[Electron](https://www.electronjs.org/)
 
-2、[Element-UI](https://element.eleme.io/#/zh-CN)
+2、[Vue](https://vuejs.org/)
 
-3、[NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)
+3、[Element-UI](https://element.eleme.io/#/zh-CN)
+
+4、[NeteaseCloudMusicApi](https://github.com/Binaryify/NeteaseCloudMusicApi)
+
+5、[Node-Taglib-Sharp](https://github.com/benrr101/node-taglib-sharp)
